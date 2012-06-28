@@ -1,0 +1,32 @@
+{
+  "name": "My First Extension",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "The first extension that I made.",
+  "browser_action": {
+    "default_icon": "icon.png",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "scripts": ["jquery.js", "string.extensions.js", "sample.js"]
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "contextMenus", 
+    "<all_urls>"
+  ], 
+  "icons": {
+    "16": "icon.png"
+  },
+  "content_scripts": [
+  {
+    "matches": ["http://*/*"],
+    "js": ["jquery.js", "sample.js"]
+  }],
+  "web_accessible_resources": [
+     "close.svg", "polyglot.css", "frame.html"
+  ]
+}
+
+
