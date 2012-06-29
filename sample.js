@@ -1,4 +1,3 @@
-var storage = chrome.storage.local;
 var context = "selection";
 var services = {
         "Multitran": {
@@ -29,6 +28,8 @@ function arrangeWindow(){
 
 function popupTranslation(title, translation) {
     try {
+		alert(translation);
+		/*
         var closeIcon = chrome.extension.getURL("close.svg");
         $(document.body).append(
             "<div id='extension-translation' style='width:100%; padding:0px 10px; position:absolute;z-index:2147483647;'>" +
@@ -47,23 +48,20 @@ function popupTranslation(title, translation) {
             "</center>" +
             "</div>");
 
-        storage.get('html', function (html) {
-            console.log(html[0]);
-        });
-
         //$("#extension-translation-content").html(translation);
         $("#extension-translation-close-button, #extension-translation").click(function () {
             $("#extension-translation").remove();
         });
 
-        //$("#extension-translation-invisible-host").html(translation);
-        //$("#extension-translation-content").html($("#extension-translation-invisible-host > .js-article-html").html());
-        //alert($("#extension-translation-invisible-host > .js-article-html").html());
+        $("#extension-translation-invisible-host").html(translation);
+        $("#extension-translation-content").html($("#extension-translation-invisible-host > .js-article-html").html());
+        alert($("#extension-translation-invisible-host > .js-article-html").html());
         arrangeWindow();
 
         $(document).scroll(function () {
             arrangeWindow();
         });
+		*/
     }
     catch (e) {
         console.log(e);
@@ -86,7 +84,13 @@ function onClick(info, tab) {
                 matches = regex.exec(xhr.responseText);
             }
 
-            storage.set({ 'html': results[0] });
+			var properties = {
+				selection: info.selectionText, 
+				from: "en", 
+				to: "ru", 
+				translationBody: results[0]
+			};
+			
             //            console.log(JSON.stringify(chrome));
             //            console.log(results.join("; "));
             //            $.get(chrome.extension.getURL("polyglot.css"), function (data) {
@@ -95,14 +99,20 @@ function onClick(info, tab) {
             //                $(document.head).append(style);
             //            });
             //            //chrome.tabs.insertCSS(null, { file: "polyglot.css" });
-            // var formatted = results.join("; ").replace(/"/gi, "'").replace(/\n/gi, "\\ \n");
-            //console.log(String.format('popupTranslation("{0} [{1}]","{2}")', info.selectionText, "en->ru", formatted));
+            //alert(results.join("; "));
+			var formatted = results.join("; ").replace(/"/gi, "'").replace(/\s+/gim, "").substr(0, 1000);
+			//alert(formatted);
+			var method = String.format('popupTranslation("{0} [{1}]","{2}")', info.selectionText, "en->ru", formatted);
+            console.log(method);
+			alert(method);
             chrome.tabs.executeScript(
                     null,
-                    { code: String.format("popupTranslation('{0} [{1}]','{2}')", info.selectionText, "en->ru", "html")});
+                    { code: method});
 
         }
     }
 
     xhr.send();
   }
+ 
+  
