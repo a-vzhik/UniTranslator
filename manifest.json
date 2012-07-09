@@ -22,9 +22,11 @@
   },
   "content_scripts": [
   {
-    "matches": ["http://*/*"],
+    "all_frames": true,
+    "matches": ["<all_urls>"],
     "js": ["jquery.js", "sample.js"]
   }],
+  "options_page": "options.html",
   "web_accessible_resources": [
      "close.svg", "polyglot.css", "frame.html"
   ]

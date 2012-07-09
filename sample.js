@@ -1,10 +1,42 @@
+var wordReferenceApiKey = "00ecd";
+
 var context = "selection";
 var services = {
         "Multitran": {
-            uri:"http://multitran.ru/c/m.exe?CL=1&s={0}&l1=1"
+            uri:"http://multitran.ru/c/m.exe?CL=1&s={0}&l1=1", 
+			parse:function(html){
+				alert("Service Unavailable!");
+			}
         }, 
+		"WordReference": {
+			uri: "http://api.wordreference.com/0.8/"+wordReferenceApiKey+"/json/enfr/{0}", 
+			parse: function(html){
+				alert(html);
+			}
+		},
         "Abbyy Lingvo" : {
-            uri: "http://lingvopro.abbyyonline.com/ru/Translate/en-ru/{0}"
+            uri: "http://lingvopro.abbyyonline.com/ru/Translate/en-ru/{0}",
+			parse: function(html){
+				html = html.toLowerCase();
+
+				var endToken = '</div>';
+				var beginToken = '<div class="js-article-html">';
+
+				var begin = html.indexOf(beginToken);
+				var end = html.indexOf(endToken, begin);
+
+				var card = html.substring(begin, end + endToken.length);
+
+				begin = card.indexOf("<p");
+				end = card.length;
+
+				return card.substring(begin, end)
+					.replace(/"/gim, "\\" + "\"")
+					.replace(/'/gim, "\\" + "\'")
+					.replace(/<noscript>/gim, "")
+					.replace(/<\/noscript>/gim, "")
+					.replace(/(\n|\r|\r\n)/gim, "");
+			}
         }
     };
 
@@ -22,97 +54,115 @@ for (var key in services) {
 }
 
 function arrangeWindow(){
-    $("#extension-translation").css('top', $(document).scrollTop());
+    $("#extension-translation").css('top', $(document).scrollTop()+1);
     $("#extension-translation").css('left', $(document).scrollLeft());    
 }
 
+/*
+function parseResponse(html) {
+    html = html.toLowerCase();
+
+    var endToken = '</div>';
+    var beginToken = '<div class="js-article-html">';
+
+    var begin = html.indexOf(beginToken);
+    var end = html.indexOf(endToken, begin);
+
+    var card = html.substring(begin, end + endToken.length);
+
+    begin = card.indexOf("<p");
+    end = card.length;
+
+    return card.substring(begin, end)
+        .replace(/"/gim, "\\" + "\"")
+        .replace(/'/gim, "\\" + "\'")
+        .replace(/<noscript>/gim, "")
+        .replace(/<\/noscript>/gim, "")
+        .replace(/(\n|\r|\r\n)/gim, "");
+}
+*/
+
 function popupTranslation(title, translation) {
-    try {
-		alert(translation);
-		/*
-        var closeIcon = chrome.extension.getURL("close.svg");
-        $(document.body).append(
-            "<div id='extension-translation' style='width:100%; padding:0px 10px; position:absolute;z-index:2147483647;'>" +
-            "<center>" +
-            "<div style='width:90%; color:black; font-family:Verdana; text-align:justify; font-weight:bold; font-size:10pt; background:#EEFFEE; border:gray 2px solid; '>" +
-            "  <div id='poliglot-extension-menu' style='height:30px; background:#ccc;line-height:30px;vertical-align:middle'>" +
-            "    <div id='extension-translation-close-button' style='cursor:pointer; float:right; margin:0px 10px;'>" +
-            "       <img style='height:16px; width:16px;' src='" + closeIcon + "'/>" +
-            "    </div>" +
-            "    <span style='margin-left:10px'>" + title + "</span>" +
-            "  </div>" +
-            "  <div id='extension-translation-content' style='margin:10px'></div>" +
-            "  <div id='extension-translation-invisible-host' style=''>weerweeew</div>" +
-            "</div>" +
-                //"<iframe style='width:90%;' src='" + chrome.extension.getURL("frame.html") + "'/>" +
-            "</center>" +
-            "</div>");
+    var closeIcon = chrome.extension.getURL("close.svg");
 
-        //$("#extension-translation-content").html(translation);
-        $("#extension-translation-close-button, #extension-translation").click(function () {
-            $("#extension-translation").remove();
+    $(document.body).append(
+        "<div id='extension-translation' style='width:90%; padding:0px 10px; position:absolute;z-index:2147483647;display:none;'>" +
+        "<center>" +
+        "<div style='color:black; font-family:Verdana; text-align:justify; font-size:10pt; background:#fff; width:600px;-webkit-box-shadow: 3px 3px 5px #666;border:#4EA6EA solid 1px'>" +
+        "  <div id='poliglot-extension-menu' style='font-weight:bold; height:30px; background:#4EA6EA; color:white; line-height:30px;vertical-align:middle'>" +
+        "    <div id='extension-translation-close-button' style='cursor:pointer; float:right; margin:0px 10px;'>" +
+        "       <img style='height:16px; width:16px;' src='" + closeIcon + "'/>" +
+        "    </div>" +
+        "    <span style='margin-left:10px'>" + title + "</span>" +
+        "  </div>" +
+        "  <div id='extension-translation-content' style='font-size:8pt;margin:10px;'></div>" +
+        "</div>" +
+            //"<iframe style='width:90%;' src='" + chrome.extension.getURL("frame.html") + "'/>" +
+        "</center>" +
+        "</div>");
+
+    $("#extension-translation-content").html(translation);
+    $("#extension-translation-close-button").click(function () {
+        $("#extension-translation").fadeOut(
+            'slow', 
+            function () {
+                $("#extension-translation").remove()
+            });
+    });
+
+    function complementAttrubite(attributeName) {
+        $("#extension-translation-content *[" + attributeName + "]").each(function (_, element) {
+            var value = $(element).attr(attributeName);
+            var base = "http://lingvopro.abbyyonline.com";
+            if(value[0] != '/')
+            {
+                base = base + "/";
+            }
+            var complementedValue =  base + value;
+            $(element).attr(attributeName, complementedValue);
         });
+    }
 
-        $("#extension-translation-invisible-host").html(translation);
-        $("#extension-translation-content").html($("#extension-translation-invisible-host > .js-article-html").html());
-        alert($("#extension-translation-invisible-host > .js-article-html").html());
+    complementAttrubite("href");
+    complementAttrubite("src");
+    //complementAttrubite("data-flash-url");
+    //complementAttrubite("value");
+
+    console.log($("#extension-translation").html());
+
+    arrangeWindow();
+
+    $(document).scroll(function () {
         arrangeWindow();
+    });
 
-        $(document).scroll(function () {
-            arrangeWindow();
-        });
-		*/
-    }
-    catch (e) {
-        console.log(e);
-    }
+    $("#extension-translation-content p").css("margin", 0);
+    $("#extension-translation-content p").css("padding", 0);
+    $("#extension-translation-content .p1").css("padding-left", 10);
+    $("#extension-translation-content .p2").css("padding-left", 20);
+
+    $("#extension-translation").fadeIn('fast', function () {
+        if ($("#extension-translation-content").height() > $(window).height() / 2) {
+            $("#extension-translation-content").css('height', $(window).height() / 2);
+            $("#extension-translation-content").css('overflow-y', 'auto');
+        }
+    });
 }
 
 function onClick(info, tab) {
-    var uri = String.format(hash[info.menuItemId].uri, info.selectionText);
+	var descriptor = hash[info.menuItemId];
+    var uri = String.format(descriptor.uri, info.selectionText);
     var xhr = new XMLHttpRequest();
     xhr.open("GET", uri, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4) {
-            var regex = /<body[^>]*>([\s\S]+)<\/body>/gim; /*/<span class="translation">([^,<;]+)<\/span>/gi;*/
-            var matches = regex.exec(xhr.responseText);
-            var results = new Array();
-            while (matches != null) {
-                if (matches[1].isWhitespace() == false) {
-                    results.push(matches[1]);
-                }
-                matches = regex.exec(xhr.responseText);
-            }
-
-			var properties = {
-				selection: info.selectionText, 
-				from: "en", 
-				to: "ru", 
-				translationBody: results[0]
-			};
-			
-            //            console.log(JSON.stringify(chrome));
-            //            console.log(results.join("; "));
-            //            $.get(chrome.extension.getURL("polyglot.css"), function (data) {
-            //                var style = String.format("<style>{0}</style>", data);
-            //                console.log(style);
-            //                $(document.head).append(style);
-            //            });
-            //            //chrome.tabs.insertCSS(null, { file: "polyglot.css" });
-            //alert(results.join("; "));
-			var formatted = results.join("; ").replace(/"/gi, "'").replace(/\s+/gim, "").substr(0, 1000);
-			//alert(formatted);
-			var method = String.format('popupTranslation("{0} [{1}]","{2}")', info.selectionText, "en->ru", formatted);
-            console.log(method);
-			alert(method);
+            var card = descriptor.parse(xhr.responseText); //parseResponse(xhr.responseText);
+            var codeToExecute = String.format('popupTranslation("{0} [{1}]","{2}")', info.selectionText, "en->ru", card);
             chrome.tabs.executeScript(
-                    null,
-                    { code: method});
-
+               null,
+               { code: codeToExecute });
         }
     }
 
     xhr.send();
   }
- 
-  
