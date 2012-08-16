@@ -26,7 +26,7 @@ function savePreferences(prefs, callback){
 	chrome.storage.local.set(
 		key, 
 		function(){ 
-			chrome.extension.sendMessage({preferences: preferences});
+			chrome.extension.sendMessage({preferences: prefs});
 			if(callback){
 				callback();
 			}

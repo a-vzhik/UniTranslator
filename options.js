@@ -29,7 +29,7 @@ function selectLanguage(point, languageSelectedCallback){
 	
 	var languagesHtml = languages.map(function(l){return "<a href='#selectLanguage'>"+l+"</a>"}).join("<br/>");
 	var html = "<div id='languages' style='padding:10px; background:white; border: solid 2px #CCC; position:absolute'>"+languagesHtml+"</div>";
-	$(document.body).append(html);
+	$(document.documentElement).append(html);
 		
 	$("#languages").css('left', point.x);
 	$("#languages").css('top', point.y);
@@ -49,7 +49,7 @@ function selectService(source, target, point, serviceSelectedCallback){
 		.join("<br/>");
 		
 	var html = "<div id='services' style='padding:10px; background:white; border: solid 2px #CCC; position:absolute'>"+servicesHtml+"</div>";
-	$(document.body).append(html);
+	$(document.documentElement).append(html);
 		
 	$(selector).css('left', point.x);
 	$(selector).css('top', point.y);
@@ -125,14 +125,32 @@ function renderPreset(preset, target){
 	});	
 }
 
+function destroyChildren(node)
+{
+  while (node.firstChild)
+      node.removeChild(node.firstChild);
+}
+
 function invalidatePresets(presets){
 	var target = $("#presets");
-	target.html("");
+	//target.html("");
+	$("#presets a").unbind('click');
+	destroyChildren(document.getElementById("presets"));//.innerHTML = '';
 	presets.each(
 		function(p){
 			renderPreset(p, target);
 		});
 }
+
+function removeNode(id){
+	var node = document.getElementById(id);
+	if(node){
+		var parent = node.parentNode || document.documentElement ;
+		parent.removeChild(node);
+	}
+	
+}
+
 
 $(document).ready(function(){
 	loadPreferences();
@@ -152,7 +170,7 @@ $(document).ready(function(){
 	});
 	
 	$(document).click(function(){
-		$("#languages").remove();
-		$("#services").remove();
+		removeNode("languages");
+		removeNode("services");
 	});
 });
