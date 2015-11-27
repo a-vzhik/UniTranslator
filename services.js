@@ -18,44 +18,65 @@ Service.prototype.isTargetLanguageSupported = function(language){
 Service.prototype.translate = function(word, source, target, callback){
 	var uri = String.format(this.url, word, this.normalize(source), this.normalize(target));
 	var parse = this.parse;
+	var complementAttribute = this.complementAttribute;
 	
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", uri, true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState == 4) {
-            var card = parse(xhr.responseText); 
-			callback(card);
-        }
-    }
+	var xhr = new XMLHttpRequest();
+	console.log(uri);
+	xhr.open("GET", uri, true);
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState == 4) {
+			//console.log(xhr.responseText);
 
-    xhr.send();	
+			var card = parse(xhr.responseText); 
+
+			var baseUrl = uri;
+			console.log("Before: " + baseUrl);
+			var hostBegin = baseUrl.indexOf("://") + 3;
+			var hostEnd = baseUrl.indexOf("/", hostBegin);
+			if (hostEnd > -1)
+			{
+				baseUrl = baseUrl.substring(0, hostEnd);
+			}
+			console.log("After: " + baseUrl);
+			complementAttribute(card, "href", baseUrl);
+			complementAttribute(card, "src", baseUrl);
+
+			callback(card.html());
+		}
+	}
+
+	xhr.send();	
+};
+
+Service.prototype.complementAttribute = function (card, attributeName, base){
+	card.find("["+attributeName+"]").each(function(_, element){
+		var value = $(element).attr(attributeName);
+		if(value.indexOf("://") > -1) {
+			return;
+		}
+
+		if(value[0] != '/')
+		{
+			value = "/" + value;
+		}
+
+		var complementedValue =  base + value;
+		console.log("Base Value: " + base);
+		console.log("Original Value: " + value);
+		console.log("Complemented Value: " + complementedValue);
+		$(element).attr(attributeName, complementedValue);
+	});
 };
 
 var abbyyService = new Service(
 	1, 
 	"Abbyy Lingvo", 
-	"http://lingvopro.abbyyonline.com/ru/Translate/{1}-{2}/{0}", 
+	"http://www.lingvo-online.ru/ru/Translate/{1}-{2}/{0}", 
 	["English", "Russian", "French", "Spanish", "German", "Italian"],
 	function(html){
-		html = html.toLowerCase();
-
-		var endToken = '</div>';
-		var beginToken = '<div class="js-article-html">';
-
-		var begin = html.indexOf(beginToken);
-		var end = html.indexOf(endToken, begin);
-
-		var card = html.substring(begin, end + endToken.length);
-
-		begin = card.indexOf("<p");
-		end = card.length;
-
-		return card.substring(begin, end)
-			.replace(/"/gim, "\\" + "\"")
-			.replace(/'/gim, "\\" + "\'")
-			.replace(/<noscript>/gim, "")
-			.replace(/<\/noscript>/gim, "")
-			.replace(/(\n|\r|\r\n)/gim, "");
+		//var card = $(html).find("div.js-article-html");
+		var card = $(html).find("div.js-section-data");
+		return card;
 	}, 
 	function(language){
 		switch(language){
@@ -75,7 +96,8 @@ var multitranService = new Service(
 	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}", 
 	["English", "Russian"], 
 	function(html){
-		return "I can't parse Multitran response yet";
+		var card = $(html).find("#translation~table:first");
+		return card;
 	}, 
 	function(language){
 		switch(language){
@@ -86,44 +108,3 @@ var multitranService = new Service(
 	});
 	
 var availableServices = [multitranService, abbyyService];
-
-/*
-var services = {
-        "Multitran": {
-            uri:"http://multitran.ru/c/m.exe?CL=1&s={0}&l1=1", 
-			parse:function(html){
-				alert("Service Unavailable!");
-			}
-        }, 
-		"WordReference": {
-			uri: "http://api.wordreference.com/0.8/"+wordReferenceApiKey+"/json/{1}{2}/{0}", 
-			parse: function(html){
-				alert(html);
-			}
-		},
-        "Abbyy Lingvo" : {
-            uri: "http://lingvopro.abbyyonline.com/ru/Translate/{1}-{2}/{0}",
-			parse: function(html){
-				html = html.toLowerCase();
-
-				var endToken = '</div>';
-				var beginToken = '<div class="js-article-html">';
-
-				var begin = html.indexOf(beginToken);
-				var end = html.indexOf(endToken, begin);
-
-				var card = html.substring(begin, end + endToken.length);
-
-				begin = card.indexOf("<p");
-				end = card.length;
-
-				return card.substring(begin, end)
-					.replace(/"/gim, "\\" + "\"")
-					.replace(/'/gim, "\\" + "\'")
-					.replace(/<noscript>/gim, "")
-					.replace(/<\/noscript>/gim, "")
-					.replace(/(\n|\r|\r\n)/gim, "");
-			}
-        }
-    };
-*/

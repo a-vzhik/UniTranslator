@@ -43,10 +43,16 @@ function onTranslateMenuItemClick(info, tab) {
 		.where(function(s){return preset.service == s.name;})
 		[0]; 
 
-	service.translate(info.selectionText, preset.source, preset.target, function(card){
-        var codeToExecute = String.format('popupTranslation("{0} [{1} -> {2}]","{3}")', info.selectionText, preset.source, preset.target, card);
-		console.log(codeToExecute);
-        chrome.tabs.executeScript(null, { code: codeToExecute });
+	service.translate(info.selectionText, preset.source, preset.target, function(card){	
+		var key = "translated";
+		var items = {};
+		items[key] = card;
+		chrome.storage.local.set(
+			items, 
+			function() { 
+				var codeToExecute = String.format('popupTranslation("{0} [{1} -> {2}]","{3}")', info.selectionText, preset.source, preset.target, key);
+				chrome.tabs.executeScript(tab.id, { code: codeToExecute }, function(){console.log("Code executed")});
+			});
 	});
 }
 
