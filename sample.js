@@ -11,13 +11,11 @@ chrome.extension.onMessage.addListener(
 function createContextMenu(presets){
 	var context = "selection";
 	
-	if(presets.length == 0)
-	{
+	if(presets.length == 0)	{
 		chrome.contextMenus.create({ "title": "Create translation presets...", "contexts": [context], "onclick": onOptionsMenuItemClick });
 		return null;
 	}
-	else
-	{
+	else {
 		var menuItems = new Dictionary();
 		var parentTitle = "Translate with";
 		var parent = chrome.contextMenus.create({ "title": parentTitle, "contexts": [context] });

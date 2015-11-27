@@ -25,47 +25,42 @@ Service.prototype.translate = function(word, source, target, callback){
 	xhr.open("GET", uri, true);
 	xhr.onreadystatechange = function () {
 		if (xhr.readyState == 4) {
-			//console.log(xhr.responseText);
-
 			var card = parse(xhr.responseText); 
 
 			var baseUrl = uri;
-			console.log("Before: " + baseUrl);
 			var hostBegin = baseUrl.indexOf("://") + 3;
 			var hostEnd = baseUrl.indexOf("/", hostBegin);
 			if (hostEnd > -1)
 			{
 				baseUrl = baseUrl.substring(0, hostEnd);
 			}
-			console.log("After: " + baseUrl);
+
 			complementAttribute(card, "href", baseUrl);
 			complementAttribute(card, "src", baseUrl);
 
 			callback(card.html());
 		}
-	}
+	};
 
 	xhr.send();	
 };
 
 Service.prototype.complementAttribute = function (card, attributeName, base){
-	card.find("["+attributeName+"]").each(function(_, element){
-		var value = $(element).attr(attributeName);
-		if(value.indexOf("://") > -1) {
-			return;
-		}
+	var selector = String.format("[{0}]", attributeName);
+	card.find(selector).attr(
+		attributeName, 
+		function (_, value) {
+			if(value.indexOf("://") > -1) {
+				return;
+			}
 
-		if(value[0] != '/')
-		{
-			value = "/" + value;
-		}
+			if(value[0] != '/')
+			{
+				value = "/" + value;
+			}
 
-		var complementedValue =  base + value;
-		console.log("Base Value: " + base);
-		console.log("Original Value: " + value);
-		console.log("Complemented Value: " + complementedValue);
-		$(element).attr(attributeName, complementedValue);
-	});
+			return base + value;		
+		});
 };
 
 var abbyyService = new Service(
@@ -74,9 +69,7 @@ var abbyyService = new Service(
 	"http://www.lingvo-online.ru/ru/Translate/{1}-{2}/{0}", 
 	["English", "Russian", "French", "Spanish", "German", "Italian"],
 	function(html){
-		//var card = $(html).find("div.js-article-html");
-		var card = $(html).find("div.js-section-data");
-		return card;
+		return $(html).find("div.js-section-data");
 	}, 
 	function(language){
 		switch(language){
@@ -86,7 +79,7 @@ var abbyyService = new Service(
 			case "Italian" : return "it";
 			case "Spanish" : return "es";
 			case "French" : return "fr";
-			default: throw "Unsupported language "+language;
+			default: throw String.format("Unsupported language: {0}", language);
 		}
 	});
 
@@ -96,14 +89,13 @@ var multitranService = new Service(
 	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}", 
 	["English", "Russian"], 
 	function(html){
-		var card = $(html).find("#translation~table:first");
-		return card;
+		return $(html).find("#translation~table:first");
 	}, 
 	function(language){
 		switch(language){
 			case "English": return "1"; 
 			case "Russian": return "2";
-			default: throw "Unsupported language "+language;
+			default: throw String.format("Unsupported language: {0}", language);
 		}
 	});
 	
