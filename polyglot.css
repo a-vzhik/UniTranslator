@@ -1,3 +1,73 @@
-﻿.extension-translation{
+﻿#options{
+	font-size:16pt; font-family:Tahoma,Verdana,Arial	
+}
+
+.extension-translation {
 	width:100%; padding:0px 10px; position:absolute;
+}
+
+#languages {
+	padding:0px 20px; background:white; border: solid 1px #CCC; position:absolute
+}
+
+#services {
+	padding:0px 20px; background:white; border: solid 1px #CCC; position:absolute
+}
+
+#services div, #languages div {
+	margin-top:10px;
+	margin-bottom:5px;
+}
+
+
+#presets {
+	font-size:16pt;	
+	display: none;
+}
+
+#options a, #options a:visited {
+	color: #56B0FF;
+	text-decoration: none;
+}
+
+#options a:hover {
+	text-decoration: underline;
+}
+
+#presets th {
+	padding: 10px 20px;
+	text-align: center;	
+	background: #56B0FF;
+	color: white;
+	font-weight: normal;
+}
+
+#presets td {
+	text-align: center;
+	padding: 5px;	
+}
+
+#create-preset {
+	/*
+	background: white;
+	border-width: 1px solid red;
+	padding: 5px 5px 5px 25px;
+	text-decoration:none;
+	font-size: 16pt;
+	*/
+	padding: 10px 15px 11px !important;
+	font-size: 18px !important;
+	background-color: #57d6c7;
+	color: #ffffff;
+	border-radius: 5px;
+	border: 1px solid #57D6C7;
+	cursor: pointer;
+}
+
+#create-preset:focus {
+	outline: none;
+}
+#create-preset:active {
+	outline: none;
+	background: #10D19A;
 }

@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>My Test Extension Options</title>
+		<title>Polyglot Options</title>
 		<script src="jquery.js"></script>
 		<script src="functional.js"></script>
 		<script src="array.extensions.js"></script>
@@ -13,11 +13,25 @@
 
 		</script>
 	-->
+		<link rel="stylesheet" href="polyglot.css"> 
 	</head>
-	<body style="font-size:12pt; font-family:Tahoma,Verdana,Arial">
-		<a href="#create" id="create-preset">Create preset</a>
-		<a href="#clear" id="remove-all-presets">Clear</a>
-		
-		<div id="presets"></div>		
+	<body id="options">
+		<center>
+			<br/>
+			<br/>
+			
+				<table id="presets" cellspacing="0">
+					<tr>
+						<th>Source language</th>
+						<th>Destination language</th>
+						<th>Translation service</th> 
+						<th></th>
+					</tr>
+				<table>
+					
+				<br/>
+	
+				<button id="create-preset" value="Create translation preset">Create preset</button>
+		</center>
 	</body>
 </html>

@@ -5,13 +5,13 @@ var preferences = null;
 chrome.extension.onMessage.addListener(
 	function(request, sender, sendResponse) {
 		//console.log(JSON.stringify(request));
-		if(request.contains("preferences")){
+		if (request.contains("preferences")) {
 			preferences = request.preferences;
 			invalidatePresets(request.preferences.presets);
 		}
 	});
 
-function Preset(from, to, serviceId){
+function Preset (from, to, serviceId) {
 	this._from = from;
 	this._to = to; 
 	this._serviceId = serviceId; 
@@ -24,56 +24,70 @@ function createGuid() {
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 }
 
-function selectLanguage(point, languageSelectedCallback){
-	$("#languages").remove();
+function selectLanguage (point, languageSelectedCallback) {
+	$("#languages").detach();
 	
-	var languagesHtml = languages.map(function(l){return "<a href='#selectLanguage'>"+l+"</a>"}).join("<br/>");
-	var html = "<div id='languages' style='padding:10px; background:white; border: solid 2px #CCC; position:absolute'>"+languagesHtml+"</div>";
-	$(document.documentElement).append(html);
+	var languagesHtml = languages
+		.map(function (l) {
+			return "<div><a href='#selectLanguage'>"+l+"</a></div>"
+		})
+		.join("");
+		
+	var html = "<div id='languages'>"+languagesHtml+"</div>";
+	$("#options").append(html);
 		
 	$("#languages").css('left', point.x);
 	$("#languages").css('top', point.y);
 	
-	$("#languages a").click(function(e){
+	$("#languages a").click(function (e) {
 		languageSelectedCallback($(e.target).html());
 	});
 }
 
-function selectService(source, target, point, serviceSelectedCallback){
+function selectService (source, target, point, serviceSelectedCallback) {
 	var selector = "#services";
-	$(selector).remove();
+	$(selector).detach();
 	
 	var servicesHtml = availableServices
-		.where(function(item){return item.isSourceLanguageSupported(source) && item.isTargetLanguageSupported(target); })
-		.map(function(s){return "<a href='#selectService'>"+s.name+"</a>"})
-		.join("<br/>");
+		.where(function (item) {
+			return item.isSourceLanguageSupported(source) && item.isTargetLanguageSupported(target); 
+		})
+		.map(function (s) {
+			return "<div><a href='#selectService'>"+s.name+"</a></div>";
+		})
+		.join("");
 		
-	var html = "<div id='services' style='padding:10px; background:white; border: solid 2px #CCC; position:absolute'>"+servicesHtml+"</div>";
-	$(document.documentElement).append(html);
+	$("#options").append(
+		$("<div>")
+			.attr("id", "services")
+			.css('left', point.x)
+			.css('top', point.y)
+			.append(servicesHtml));
 		
-	$(selector).css('left', point.x);
-	$(selector).css('top', point.y);
-	
-	$(selector + " a").click(function(e){
+	$(selector + " a").click(function (e) {
 		serviceSelectedCallback($(e.target).html());
 	});
 }
 
-function fixService(preset){
-	// if current service supports both languages - there is no need to change service
-	var activeService = availableServices.where(function(s){return s.name == preset.service;})[0];
-	if(activeService.isSourceLanguageSupported(preset.source) && activeService.isTargetLanguageSupported(preset.target)){
+function fixService (preset) {
+	// if the current service supports both languages - there is no need to change a service
+	var activeService = availableServices.where(function (s) {
+		return s.name == preset.service;
+	})[0];
+	if (activeService.isSourceLanguageSupported(preset.source) 
+		&& activeService.isTargetLanguageSupported(preset.target)) {
 		return;
 	}
 	
-	// if current service doesn't support both languages - we have to find first service that does.
+	// if the current service doesn't support both languages - we have to find a first service that does.
 	preset.service = availableServices
-		.where(function(item){return item.isSourceLanguageSupported(preset.source) && item.isTargetLanguageSupported(preset.target); })	
-		[0]
+		.where(function (item) {
+			return item.isSourceLanguageSupported(preset.source) && item.isTargetLanguageSupported(preset.target); 
+		})[0]
 		.name;
 }
 
-function renderPreset(preset, target){
+function renderPreset (preset, target) {
 	var html = String.format(
 		"<div id='{3}'>From <a href='#changeSource'>{0}</a> to <a href='#changeTarget'>{1}</a> with service <a href='#changeService'>{2}</a> [<a href='#removePreset'>remove</a>]</div>", 
 		preset.source, 
@@ -84,93 +98,180 @@ function renderPreset(preset, target){
 	
 	var presetSelector = "#"+ preset.id;
 	
-	$(presetSelector + " a[href='#changeSource']").click(function(e){
-		//forEachIn(e, function(key,value){document.write(key + " = "+value + "<BR/>");});
+	$(presetSelector + " a[href='#changeSource']").click(function (e) {
 		e.stopPropagation();
 		selectLanguage(
-			{x: e.clientX, y: e.clientY}, 
-			function(language){
+			{
+				x: e.clientX, 
+				y: e.clientY
+			}, 
+			function (language) {
 				preset.source = language;
 				fixService(preset);
 				savePreferences(preferences);
 			});
 	});
 	
-	$(presetSelector + " a[href='#changeTarget']").click(function(e){
+	$(presetSelector + " a[href='#changeTarget']").click(function (e) {
 		e.stopPropagation();
 		selectLanguage(
-			{x: e.clientX, y: e.clientY}, 
-			function(language){
+			{
+				x: e.clientX, 
+				y: e.clientY
+			}, 
+			function (language) {
 				preset.target = language;
 				fixService(preset);
 				savePreferences(preferences);
 			});
 	});
 	
-	$(presetSelector + " a[href='#changeService']").click(function(e){
+	$(presetSelector + " a[href='#changeService']").click(function (e) {
 		e.stopPropagation();
 		selectService(
 			preset.source, 
 			preset.target,
-			{x: e.clientX, y: e.clientY}, 
-			function(service){
+			{
+				x: e.clientX, 
+				y: e.clientY
+			}, 
+			function (service) {
 				preset.service = service;
 				savePreferences(preferences);
 			});
 	});	
 	
-	$(presetSelector + " a[href='#removePreset']").click(function(){
+	$(presetSelector + " a[href='#removePreset']").click(function () {
 		preferences.presets.remove(preset);
 		savePreferences(preferences);
 	});	
 }
 
-function destroyChildren(node)
-{
-  while (node.firstChild)
-      node.removeChild(node.firstChild);
+function renderPreset2 (preset, target) {
+	console.log(preset.id);
+	
+	$("#presets").append(
+		$("<tr>").attr("class", "preset").attr("id", preset.id)
+			.append($("<td>")
+				.append($("<a>").attr("href", "#changeSource")
+					.append(preset.source)))
+			.append($("<td>")
+				.append($("<a>").attr("href", "#changeTarget")
+					.append(preset.target)))
+			.append($("<td>")
+				.append($("<a>").attr("href", "#changeService")
+					.append(preset.service)))
+			.append($("<td>")
+				.append($("<a>").attr("href", "#removePreset")
+					.append($("<img>").attr("src", "media/icons/close-32.png"))))
+	)
+	
+	var presetSelector = String.format("#{0}", preset.id);
+	
+	var changeSourceSelector = String.format("{0} a[href='#changeSource']", presetSelector); 	
+	$(changeSourceSelector).click(function (e) {
+		e.stopPropagation();
+		selectLanguage(
+			{
+				x: e.clientX, 
+				y: e.clientY
+			}, 
+			function (language) {
+				preset.source = language;
+				fixService(preset);
+				savePreferences(preferences);
+			});
+	});
+	
+	var changeTargetSelector = String.format("{0} a[href='#changeTarget']", presetSelector);
+	$(changeTargetSelector).click(function (e) {
+		e.stopPropagation();
+		selectLanguage(
+			{
+				x: e.clientX, 
+				y: e.clientY
+			}, 
+			function (language) {
+				preset.target = language;
+				fixService(preset);
+				savePreferences(preferences);
+			});
+	});
+	
+	var changeServiceSelector = String.format("{0} a[href='#changeService']", presetSelector);
+	$(changeServiceSelector).click(function (e) {
+		e.stopPropagation();
+		selectService(
+			preset.source, 
+			preset.target,
+			{
+				x: e.clientX, 
+				y: e.clientY
+			}, 
+			function (service) {
+				preset.service = service;
+				savePreferences(preferences);
+			});
+	});	
+	
+	var removeSelector = String.format("{0} a[href='#removePreset']", presetSelector);
+	$(removeSelector).click(function () {
+		preferences.presets.remove(preset);
+		savePreferences(preferences);
+	});
 }
 
-function invalidatePresets(presets){
+function destroyChildren (node) {
+	while (node.firstChild) {
+		node.removeChild(node.firstChild);
+	}
+}
+
+function invalidatePresets (presets) {
+	$("#presets tr.preset a").unbind('click');
+	$("#presets tr.preset").detach();
+
 	var target = $("#presets");
-	//target.html("");
-	$("#presets a").unbind('click');
-	destroyChildren(document.getElementById("presets"));//.innerHTML = '';
-	presets.each(
-		function(p){
-			renderPreset(p, target);
-		});
+	target.css("display", presets.length == 0 ? "none" : "table");
+	presets.each(function (p) {
+		renderPreset2(p, target);
+	});
 }
 
-function removeNode(id){
+function removeNode (id) {
 	var node = document.getElementById(id);
-	if(node){
+	if (node) {
 		var parent = node.parentNode || document.documentElement ;
 		parent.removeChild(node);
-	}
-	
+	}	
 }
 
 
-$(document).ready(function(){
+$(document).ready(function () {
 	loadPreferences();
 		
-	$("#create-preset").click(function(){
-		var preset = {source:languages[0], target:languages[0], service:availableServices[0].name, id:createGuid()};
+	$("#create-preset").click(function () {
+		var preset = {
+			source:languages[0], 
+			target:languages[0], 
+			service:availableServices[0].name, 
+			id:createGuid()
+		};
+		
 		fixService(preset);
 		preferences.presets.push(preset);
 		savePreferences(preferences);
 	});
 
-	$("#remove-all-presets").click(function(){
-		chrome.storage.local.clear(function(){
+	$("#remove-all-presets").click(function () {
+		chrome.storage.local.clear(function () {
 			preferences.presets = [];
 			savePreferences(preferences);
 		});
 	});
 	
-	$(document).click(function(){
-		removeNode("languages");
-		removeNode("services");
+	$(document).click(function () {
+		$("#languages").detach();
+		$("#services").detach();
 	});
 });

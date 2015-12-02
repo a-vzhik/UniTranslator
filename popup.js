@@ -22,7 +22,6 @@ function popupTranslation(title, translationKey) {
 			        "  </div>" +
 			        "  <div id='extension-translation-content' style='font-size:8pt;margin:10px;'></div>" +
 			        "</div>" +
-			            //"<iframe style='width:90%;' src='" + chrome.extension.getURL("frame.html") + "'/>" +
 			        "</center>" +
 			        "</div>");
 
