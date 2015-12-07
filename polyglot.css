@@ -48,13 +48,6 @@
 }
 
 #create-preset {
-	/*
-	background: white;
-	border-width: 1px solid red;
-	padding: 5px 5px 5px 25px;
-	text-decoration:none;
-	font-size: 16pt;
-	*/
 	padding: 10px 15px 11px !important;
 	font-size: 18px !important;
 	background-color: #57d6c7;
@@ -67,6 +60,7 @@
 #create-preset:focus {
 	outline: none;
 }
+
 #create-preset:active {
 	outline: none;
 	background: #10D19A;

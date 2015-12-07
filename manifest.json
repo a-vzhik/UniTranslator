@@ -8,7 +8,7 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "scripts": ["jquery.js", "functional.js", "array.extensions.js", "dictionary.js", "string.extensions.js", "preferences.js", "services.js", "sample.js"]
+    "scripts": ["jquery.js", "functional.js", "array.extensions.js", "dictionary.js", "string.extensions.js", "preferences.js", "services.js", "polyglot.js"]
   },
   "permissions": [
     "storage",

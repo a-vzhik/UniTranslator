@@ -1,92 +1,95 @@
-function arrangeWindow(){
-	$("#polyglot-extension-translation-frame").css('top', $(document).scrollTop()+1);
+function arrangeTranslationFrame () {
+	var frame = $("#polyglot-extension-translation-frame"); 
 
-	var diff = $(window).width() - $("#polyglot-extension-translation-frame").width();
-	$("#polyglot-extension-translation-frame").css("left", $(document).scrollLeft() + diff/2)
+	var diff = $(window).width() - frame.width();
+	frame.css("left", $(document).scrollLeft() + diff/2)
+	frame.css('top', $(document).scrollTop() + 10);
 }
 
-function popupTranslation(title, translationKey) {
+function setupTranslationFrame (title, translation) {
+	var frameContents = $("#polyglot-extension-translation-frame").contents();
+	
+	frameContents.find("body")
+		.css("margin", "0px")
+		.css("padding", "0px");
+		
+	frameContents.find("body").append(
+		 $("<div>")
+			.attr("id", "extension-translation")
+			.attr("style", "color:black; font-family:Verdana; text-align:justify;  background:white; font-size:10pt; background:#fff; width:600px;-webkit-box-shadow: 3px 3px 5px #666;border:#4EA6EA solid 1px")
+			.append($("<div>")
+				.attr("id", "poliglot-extension-menu")
+				.attr("style", "font-weight:bold; height:30px; background:#4EA6EA; color:white; line-height:30px;vertical-align:middle")
+				.append($("<div>")
+					.attr("id", "extension-translation-close-button")
+					.attr("style", "cursor:pointer; float:right; margin:7px 10px;")
+					.append($("<img>")
+						.attr("style", "height:16px; width:16px;")
+						.attr("src", chrome.extension.getURL("close.svg"))))
+				.append($("<span>")
+					.attr("style", "margin-left:10px")
+					.append(title)))
+			.append($("<div>")
+				.attr("id", "extension-translation-content")
+				.attr("style", "font-size:8pt;margin:10px;")
+				.append(translation)));
+
+	frameContents.find("#extension-translation-close-button").click(function () {
+		$("#polyglot-extension-translation-frame").fadeOut(
+			'slow', 
+			function () {
+				$("#polyglot-extension-translation-frame").remove()
+			});
+	});
+
+	frameContents.find("#extension-translation-content p")
+		.css("margin", 0)
+		.css("padding", 0);
+
+	// By default TABLEs ignore font settings of parent nodes. 
+	// Force them to follow parent's font settings. 
+	frameContents.find("#extension-translation-content table")
+		.css("font-size", "inherit")
+		.css("font-family", "inherit");
+
+	// If translation content is longer than half-height 
+	// of the window - restrict it to half-height of the window. 	
+	var contentDiv = frameContents.find("#extension-translation-content");
+	if (contentDiv.outerHeight() > $(window).height() / 2) {
+		contentDiv.height($(window).height() / 2);
+		contentDiv.css('overflow-y', 'auto');
+	}
+
+	// #extension-translation block has shadows, so we add 10 pixels 
+	// to ensure IFRAME enough space trying to avoid scrollbars .  
+	var translationDiv = frameContents.find("#extension-translation");
+	$("#polyglot-extension-translation-frame").width(
+		translationDiv.outerWidth()+10);
+	$("#polyglot-extension-translation-frame").height(
+		translationDiv.outerHeight()+10);
+
+	arrangeTranslationFrame();
+	$(document).scroll(arrangeTranslationFrame);
+
+	$("#polyglot-extension-translation-frame").fadeIn('fast');
+} 
+
+function popupTranslation (title, translationKey) {
 	chrome.storage.local.get(
 		translationKey, 
 		function(items) {
-			var translation = items[translationKey];			
-			var closeIcon = chrome.extension.getURL("close.svg");
-
 			$(document.body).prepend(
 				$("<iframe>")
 					.attr("id", "polyglot-extension-translation-frame")
-					//.attr("src", chrome.extension.getURL("popup.html"))
 					.attr("frameborder", 0)
 					.css("position", "absolute")
 					.css("border", "0px")
 					.css("display", "none")
-					.css("float", "right")
-					.css("padding", "0px")
 					.css("z-index", "2147483647"));
 
+			var translation = items[translationKey];			
 			$("#polyglot-extension-translation-frame").ready(function () {
-				//return;
-				var frameContents = $("#polyglot-extension-translation-frame").contents();
-				
-				frameContents.find("body")
-					.css("margin", "0px")
-					.css("padding", "0px");
-					
-				frameContents.find("body").append(
-						$(
-						"<div id='extension-translation' style='color:black; font-family:Verdana; text-align:justify;  background:white; font-size:10pt; background:#fff; width:600px;-webkit-box-shadow: 3px 3px 5px #666;border:#4EA6EA solid 1px'>" +
-						"  <div id='poliglot-extension-menu' style='font-weight:bold; height:30px; background:#4EA6EA; color:white; line-height:30px;vertical-align:middle'>" +
-						"    <div id='extension-translation-close-button' style='cursor:pointer; float:right; margin:7px 10px;'>" +
-						"       <img style='height:16px; width:16px;' src='" + closeIcon + "'/>" +
-						"    </div>" +
-						"    <span style='margin-left:10px'>" + title + "</span>" +
-						"  </div>" +
-						"  <div id='extension-translation-content' style='font-size:8pt;margin:10px;'></div>" +
-						"</div>"));
-						
-	
-				frameContents.find("#extension-translation-content").html(translation);
-				frameContents.find("#extension-translation-close-button").click(function () {
-					$("#polyglot-extension-translation-frame").fadeOut(
-						'slow', 
-						function () {
-							$("#polyglot-extension-translation-frame").remove()
-						});
-				});
-	
-				//complementAttrubite("data-flash-url");
-				//complementAttrubite("value");
-	
-				arrangeWindow();
-	
-				$(document).scroll(function () {
-						arrangeWindow();
-				});
-	
-				frameContents.find("#extension-translation-content p").css("margin", 0);
-				frameContents.find("#extension-translation-content p").css("padding", 0);
-				//frameContents.find("#extension-translation-content .p1").css("padding-left", 10);
-				//frameContents.find("#extension-translation-content .p2").css("padding-left", 20);
-
-				var translationContentDiv = frameContents.find("#extension-translation-content");
-				var translationDiv = frameContents.find("#extension-translation");
-
-				if (translationContentDiv.outerHeight() > $(window).height() / 2) {
-					translationContentDiv.height(
-						$(window).height() / 2);
-					translationContentDiv.css('overflow-y', 'auto');
-				}
-
-				$("#polyglot-extension-translation-frame").width(
-					translationDiv.outerWidth()+10);
-				$("#polyglot-extension-translation-frame").height(
-					translationDiv.outerHeight()+10);
-	
-				var diff = $(window).width() - $("#polyglot-extension-translation-frame").width();
-				$("#polyglot-extension-translation-frame").css("left", diff/2)
-	
-				$("#polyglot-extension-translation-frame").fadeIn('fast');
-/**/				
+				setupTranslationFrame(title, translation);
 			});
 		});
 }

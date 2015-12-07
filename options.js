@@ -70,7 +70,7 @@ function selectService (source, target, point, serviceSelectedCallback) {
 }
 
 function fixService (preset) {
-	// if the current service supports both languages - there is no need to change a service
+	// If the current service supports both languages - there is no need to change a service
 	var activeService = availableServices.where(function (s) {
 		return s.name == preset.service;
 	})[0];
@@ -79,7 +79,7 @@ function fixService (preset) {
 		return;
 	}
 	
-	// if the current service doesn't support both languages - we have to find a first service that does.
+	// If the current service doesn't support both languages - we have to find a first service that does.
 	preset.service = availableServices
 		.where(function (item) {
 			return item.isSourceLanguageSupported(preset.source) && item.isTargetLanguageSupported(preset.target); 
