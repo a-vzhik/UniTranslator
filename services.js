@@ -20,12 +20,12 @@ Service.prototype.translate = function(word, source, target, callback){
 	var parse = this.parse;
 	var complementAttribute = this.complementAttribute;
 	
-	var xhr = new XMLHttpRequest();
+	var request = new XMLHttpRequest();
 	console.log(uri);
-	xhr.open("GET", uri, true);
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState == 4) {
-			var card = parse(xhr.responseText); 
+	request.open("GET", uri, true);
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			var card = parse(request.responseText); 
 
 			var baseUrl = uri;
 			var hostBegin = baseUrl.indexOf("://") + 3;
@@ -42,7 +42,7 @@ Service.prototype.translate = function(word, source, target, callback){
 		}
 	};
 
-	xhr.send();	
+	request.send();	
 };
 
 Service.prototype.complementAttribute = function (card, attributeName, base){
@@ -68,10 +68,10 @@ var abbyyService = new Service(
 	"Abbyy Lingvo", 
 	"http://www.lingvo-online.ru/ru/Translate/{1}-{2}/{0}", 
 	["English", "Russian", "French", "Spanish", "German", "Italian"],
-	function(html){
+	function (html) {
 		return $(html).find("div.js-section-data");
 	}, 
-	function(language){
+	function (language) {
 		switch(language){
 			case "English": return "en"; 
 			case "Russian": return "ru";
@@ -88,15 +88,56 @@ var multitranService = new Service(
 	"Multitran", 
 	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}", 
 	["English", "Russian"], 
-	function(html){
+	function (html) {
 		return $(html).find("#translation~table:first");
 	}, 
-	function(language){
-		switch(language){
+	function (language) {
+		switch (language) {
 			case "English": return "1"; 
 			case "Russian": return "2";
 			default: throw String.format("Unsupported language: {0}", language);
 		}
 	});
 	
-var availableServices = [multitranService, abbyyService];
+var wordReferenceService = new Service(
+	3, 
+	"WordReference", 
+	"http://www.wordreference.com/{1}{2}/{0}", 
+	["English", "Russian", "French", "Spanish", "German", "Italian", "Swedish", "Portugues", "Polish", "Romanian", 
+	 "Greek", "Czech", "Chinese", "Japanese", "Korean", "Arabic", "Turkish"], 
+	function (html) {
+		var node = $(html).find("#article");
+		if (node.contents().length == 0) {
+			node = $(html).find("#articleWRD table");
+		}
+		
+		node.find("br:first, .small1").replaceWith("");
+		node.find("br:first").replaceWith("");		
+		return node;
+	}, 
+	function (language) {
+		switch (language) {
+			case "English": return "en"; 
+			case "Russian": return "ru";
+			case "French": return "fr";
+			case "Spanish": return "es";
+			case "German": return "de";
+			case "Italian": return "it";
+			case "Swedish": return "sv";
+			case "Portugues": return "pt";
+			case "Polish": return "pl";
+			case "Romanian": return "ro";
+			case "Greek": return "gr";
+			case "Czech": return "cz";
+			case "Chinese": return "zh";
+			case "Japanese": return "ja";
+			case "Korean": return "ko";
+			case "Arabic": return "ar";
+			case "Turkish": return "tr";
+			
+			default: throw String.format("Unsupported language: {0}", language);
+		}
+	}		
+);
+	
+var availableServices = [multitranService, abbyyService, wordReferenceService];
