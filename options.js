@@ -1,4 +1,7 @@
-var languages = ["English", "Russian", "French", "German", "Italian", "Spanish"];
+var languages = availableServices
+	.flatten(function (service) { return service.supportedLanguages; })
+	.distinct()
+	.sort();
 
 var preferences = null;
 
@@ -7,15 +10,9 @@ chrome.extension.onMessage.addListener(
 		//console.log(JSON.stringify(request));
 		if (request.contains("preferences")) {
 			preferences = request.preferences;
-			invalidatePresets(request.preferences.presets);
+			invalidatePresets(preferences.presets);
 		}
 	});
-
-function Preset (from, to, serviceId) {
-	this._from = from;
-	this._to = to; 
-	this._serviceId = serviceId; 
-}
 
 function createGuid() {
     function S4() {
@@ -88,66 +85,6 @@ function fixService (preset) {
 }
 
 function renderPreset (preset, target) {
-	var html = String.format(
-		"<div id='{3}'>From <a href='#changeSource'>{0}</a> to <a href='#changeTarget'>{1}</a> with service <a href='#changeService'>{2}</a> [<a href='#removePreset'>remove</a>]</div>", 
-		preset.source, 
-		preset.target, 
-		preset.service, 
-		preset.id);
-	$(target).append(html);
-	
-	var presetSelector = "#"+ preset.id;
-	
-	$(presetSelector + " a[href='#changeSource']").click(function (e) {
-		e.stopPropagation();
-		selectLanguage(
-			{
-				x: e.clientX, 
-				y: e.clientY
-			}, 
-			function (language) {
-				preset.source = language;
-				fixService(preset);
-				savePreferences(preferences);
-			});
-	});
-	
-	$(presetSelector + " a[href='#changeTarget']").click(function (e) {
-		e.stopPropagation();
-		selectLanguage(
-			{
-				x: e.clientX, 
-				y: e.clientY
-			}, 
-			function (language) {
-				preset.target = language;
-				fixService(preset);
-				savePreferences(preferences);
-			});
-	});
-	
-	$(presetSelector + " a[href='#changeService']").click(function (e) {
-		e.stopPropagation();
-		selectService(
-			preset.source, 
-			preset.target,
-			{
-				x: e.clientX, 
-				y: e.clientY
-			}, 
-			function (service) {
-				preset.service = service;
-				savePreferences(preferences);
-			});
-	});	
-	
-	$(presetSelector + " a[href='#removePreset']").click(function () {
-		preferences.presets.remove(preset);
-		savePreferences(preferences);
-	});	
-}
-
-function renderPreset2 (preset, target) {
 	console.log(preset.id);
 	
 	$("#presets").append(
@@ -234,7 +171,7 @@ function invalidatePresets (presets) {
 	var target = $("#presets");
 	target.css("display", presets.length == 0 ? "none" : "table");
 	presets.each(function (p) {
-		renderPreset2(p, target);
+		renderPreset(p, target);
 	});
 }
 
@@ -263,13 +200,6 @@ $(document).ready(function () {
 		savePreferences(preferences);
 	});
 
-	$("#remove-all-presets").click(function () {
-		chrome.storage.local.clear(function () {
-			preferences.presets = [];
-			savePreferences(preferences);
-		});
-	});
-	
 	$(document).click(function () {
 		$("#languages").detach();
 		$("#services").detach();
