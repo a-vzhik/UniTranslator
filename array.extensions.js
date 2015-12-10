@@ -26,6 +26,17 @@ Array.prototype.where = function (func) {
 	return result;
 }
 
+Array.prototype.any = function () {
+	return this.length > 0;
+}
+
+Array.prototype.firstOrNull = function () {
+	if (this.length > 0) {
+		return this[0];
+	}
+	return null;	
+}
+
 Array.prototype.remove = function (item) {
 	var i = this.indexOf(item);
 	return this.splice(i, 1);

@@ -1,8 +1,3 @@
-var languages = availableServices
-	.flatten(function (service) { return service.supportedLanguages; })
-	.distinct()
-	.sort();
-
 var preferences = null;
 
 chrome.extension.onMessage.addListener(
@@ -21,7 +16,7 @@ function createGuid() {
     return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
 }
 
-function selectLanguage (point, languageSelectedCallback) {
+function selectLanguage (languages, point, languageSelectedCallback) {
 	$("#languages").detach();
 	
 	var languagesHtml = languages
@@ -47,7 +42,7 @@ function selectService (source, target, point, serviceSelectedCallback) {
 	
 	var servicesHtml = availableServices
 		.where(function (item) {
-			return item.isSourceLanguageSupported(source) && item.isTargetLanguageSupported(target); 
+			return item.areLanguagesSupported(source, target); 
 		})
 		.map(function (s) {
 			return "<div><a href='#selectService'>"+s.name+"</a></div>";
@@ -68,20 +63,23 @@ function selectService (source, target, point, serviceSelectedCallback) {
 
 function fixService (preset) {
 	// If the current service supports both languages - there is no need to change a service
-	var activeService = availableServices.where(function (s) {
-		return s.name == preset.service;
-	})[0];
-	if (activeService.isSourceLanguageSupported(preset.source) 
-		&& activeService.isTargetLanguageSupported(preset.target)) {
+	var activeService = availableServices
+		.where(function (s) {
+			return s.name == preset.service;
+		})
+		.firstOrNull();
+
+	if (activeService != null &&
+		activeService.areLanguagesSupported(preset.source, preset.target)) {
 		return;
 	}
 	
 	// If the current service doesn't support both languages - we have to find a first service that does.
-	preset.service = availableServices
+	var candidates = availableServices
 		.where(function (item) {
-			return item.isSourceLanguageSupported(preset.source) && item.isTargetLanguageSupported(preset.target); 
-		})[0]
-		.name;
+			return item.areLanguagesSupported(preset.source, preset.target); 
+		});
+	preset.service = candidates.any() ? candidates[0].name : null;
 }
 
 function renderPreset (preset, target) {
@@ -97,7 +95,7 @@ function renderPreset (preset, target) {
 					.append(preset.target)))
 			.append($("<td>")
 				.append($("<a>").attr("href", "#changeService")
-					.append(preset.service)))
+					.append(preset.service != null ? preset.service : "No service")))
 			.append($("<td>")
 				.append($("<a>").attr("href", "#removePreset")
 					.append($("<img>").attr("src", "media/icons/close-32.png"))))
@@ -108,7 +106,17 @@ function renderPreset (preset, target) {
 	var changeSourceSelector = String.format("{0} a[href='#changeSource']", presetSelector); 	
 	$(changeSourceSelector).click(function (e) {
 		e.stopPropagation();
+		
+		var sourceLanguages = availableServices
+			.flatten(function (service) { return service.supportedLanguages; })
+			.map(function (pair) {
+				return pair[0]; 
+			})
+			.distinct()
+			.sort();		
+		
 		selectLanguage(
+			sourceLanguages, 
 			{
 				x: e.clientX, 
 				y: e.clientY
@@ -123,7 +131,15 @@ function renderPreset (preset, target) {
 	var changeTargetSelector = String.format("{0} a[href='#changeTarget']", presetSelector);
 	$(changeTargetSelector).click(function (e) {
 		e.stopPropagation();
+		
+		var targetLanguages = availableServices
+			.flatten(function (service) { return service.supportedLanguages; })
+			.map(function (pair) { return pair[1]; })
+			.distinct()
+			.sort();		
+		
 		selectLanguage(
+			targetLanguages,
 			{
 				x: e.clientX, 
 				y: e.clientY

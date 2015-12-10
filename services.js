@@ -7,15 +7,13 @@ function Service(id, name, url, supportedLanguages, parse, normalize){
 	this.normalize = normalize;
 }
 
-Service.prototype.isSourceLanguageSupported = function(language){
-	return this.supportedLanguages.indexOf(language) >= 0;
+Service.prototype.areLanguagesSupported = function (sourceLanguage, targetLanguage) {
+	return this.supportedLanguages
+		.where(function(pair) { return sourceLanguage == pair[0] && targetLanguage == pair[1]; })
+		.any();
 };
 
-Service.prototype.isTargetLanguageSupported = function(language){
-	return this.supportedLanguages.indexOf(language) >= 0;
-};
-
-Service.prototype.translate = function(word, source, target, callback){
+Service.prototype.translate = function (word, source, target, callback) {
 	var uri = String.format(this.url, word, this.normalize(source), this.normalize(target));
 	var parse = this.parse;
 	var complementAttribute = this.complementAttribute;
@@ -67,7 +65,14 @@ var abbyyService = new Service(
 	1, 
 	"Abbyy Lingvo", 
 	"http://www.lingvo-online.ru/ru/Translate/{1}-{2}/{0}", 
-	["English", "Russian", "French", "Spanish", "German", "Italian"],
+	[
+		["English", "Russian"], ["English", "French"], ["English", "Spanish"], ["English", "German"], ["English", "Italian"],
+		["Russian", "English"], ["Russian", "French"], ["Russian", "German"]
+		["French", "English"], 
+		["Spanish", "English"],
+		["German", "English"], 
+		["Italian", "English"]
+	],
 	function (html) {
 		return $(html).find("div.js-section-data");
 	}, 
@@ -87,7 +92,10 @@ var multitranService = new Service(
 	2, 
 	"Multitran", 
 	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}", 
-	["English", "Russian"], 
+	[
+		["English", "Russian"],
+		["Russian", "English"]
+	], 
 	function (html) {
 		return $(html).find("#translation~table:first");
 	}, 
@@ -103,8 +111,28 @@ var wordReferenceService = new Service(
 	3, 
 	"WordReference", 
 	"http://www.wordreference.com/{1}{2}/{0}", 
-	["English", "Russian", "French", "Spanish", "German", "Italian", "Swedish", "Portugues", "Polish", "Romanian", 
-	 "Greek", "Czech", "Chinese", "Japanese", "Korean", "Arabic", "Turkish"], 
+	[
+		["English", "Russian"], ["English", "French"], ["English", "German"], ["English", "Spanish"], 
+		["English", "Greek"], ["English", "Italian"], ["English", "Swedish"], ["English", "Portugues"], 
+		["English", "Polish"], ["English", "Romanian"], ["English", "Czech"], ["English", "Chinese"],
+		["English", "Japanese"], ["English", "Korean"], ["English", "Arabic"], ["English", "Turkish"],  
+		["Russian", "English"], 
+		["French", "English"], 
+		["German", "English"], 
+		["Spanish", "English"], 
+		["Greek", "English"], 
+		["Italian", "English"], 
+		["Swedish", "English"], 
+		["Portugues", "English"], 
+		["Polish", "English"], 
+		["Romanian", "English"], 
+		["Czech", "English"], 
+		["Chinese", "English"], 
+		["Japanese", "English"], 
+		["Korean", "English"], 
+		["Arabic", "English"], 
+		["Turkish", "English"]
+	],
 	function (html) {
 		var node = $(html).find("#article");
 		if (node.contents().length == 0) {
