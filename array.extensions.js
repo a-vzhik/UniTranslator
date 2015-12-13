@@ -59,3 +59,12 @@ Array.prototype.distinct = function () {
 	});
 	return result;	
 }
+
+Array.prototype.aggregate = function (initialValue, aggregateItemCallback) {
+	var result = initialValue; 
+	this.each(function (item) {
+		result = aggregateItemCallback(result, item);
+	})
+	
+	return result;
+}

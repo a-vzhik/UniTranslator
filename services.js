@@ -1,4 +1,31 @@
-function Service(id, name, url, supportedLanguages, parse, normalize){
+function ServiceRequest (word, sourceLanguage, targetLanguage, finalUri) {
+	this.word = word;
+	this.sourceLanguage = sourceLanguage; 
+	this.targetLanguage = targetLanguage; 
+	this.finalUri = finalUri;
+}
+
+ServiceRequest.prototype.execute = function (onCompleted) {
+	var that = this;
+	var request = new XMLHttpRequest();
+	console.log(this.finalUri);
+	request.open("GET", this.finalUri, true);
+	request.onreadystatechange = function () {
+		if (request.readyState == 4) {
+			var response = new ServiceResponse(that, request.responseText);
+			onCompleted(response);
+		}
+	};
+
+	request.send();				
+}
+
+function ServiceResponse (serviceRequest, responseBody) {
+	this.serviceRequest = serviceRequest; 
+	this.responseBody = responseBody;
+}
+
+function Service (id, name, url, supportedLanguages, parse, normalize){
 	this.id = id;
 	this.name = name;
 	this.url = url;
@@ -15,32 +42,25 @@ Service.prototype.areLanguagesSupported = function (sourceLanguage, targetLangua
 
 Service.prototype.translate = function (word, source, target, callback) {
 	var uri = String.format(this.url, word, this.normalize(source), this.normalize(target));
+	var serviceRequest = new ServiceRequest(word, source, target, uri);
 	var parse = this.parse;
 	var complementAttribute = this.complementAttribute;
 	
-	var request = new XMLHttpRequest();
-	console.log(uri);
-	request.open("GET", uri, true);
-	request.onreadystatechange = function () {
-		if (request.readyState == 4) {
-			var card = parse(request.responseText); 
+	serviceRequest.execute( function (response) {
+		var card = parse(response); 
 
-			var baseUrl = uri;
-			var hostBegin = baseUrl.indexOf("://") + 3;
-			var hostEnd = baseUrl.indexOf("/", hostBegin);
-			if (hostEnd > -1)
-			{
-				baseUrl = baseUrl.substring(0, hostEnd);
-			}
-
-			complementAttribute(card, "href", baseUrl);
-			complementAttribute(card, "src", baseUrl);
-
-			callback(card.html());
+		var baseUrl = uri;
+		var hostBegin = baseUrl.indexOf("://") + 3;
+		var hostEnd = baseUrl.indexOf("/", hostBegin);
+		if (hostEnd > -1) {
+			baseUrl = baseUrl.substring(0, hostEnd);
 		}
-	};
 
-	request.send();	
+		complementAttribute(card, "href", baseUrl);
+		complementAttribute(card, "src", baseUrl);
+
+		callback(card.html());
+	});
 };
 
 Service.prototype.complementAttribute = function (card, attributeName, base){
@@ -52,8 +72,7 @@ Service.prototype.complementAttribute = function (card, attributeName, base){
 				return;
 			}
 
-			if(value[0] != '/')
-			{
+			if(value[0] != '/') {
 				value = "/" + value;
 			}
 
@@ -67,14 +86,14 @@ var abbyyService = new Service(
 	"http://www.lingvo-online.ru/ru/Translate/{1}-{2}/{0}", 
 	[
 		["English", "Russian"], ["English", "French"], ["English", "Spanish"], ["English", "German"], ["English", "Italian"],
-		["Russian", "English"], ["Russian", "French"], ["Russian", "German"]
+		["Russian", "English"], ["Russian", "French"], ["Russian", "German"],
 		["French", "English"], 
 		["Spanish", "English"],
 		["German", "English"], 
 		["Italian", "English"]
 	],
-	function (html) {
-		return $(html).find("div.js-section-data");
+	function (response) {
+		return $(response.responseBody).find("div.js-section-data");
 	}, 
 	function (language) {
 		switch(language){
@@ -91,18 +110,20 @@ var abbyyService = new Service(
 var multitranService = new Service(
 	2, 
 	"Multitran", 
-	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}", 
+	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}",
 	[
-		["English", "Russian"],
-		["Russian", "English"]
+		["English", "Russian"], 
+		["German", "Russian"],
+		["Russian", "English"], ["Russian", "German"]
 	], 
-	function (html) {
-		return $(html).find("#translation~table:first");
+	function (response) {
+		return $(response.responseBody).find("#translation~table:first");
 	}, 
 	function (language) {
 		switch (language) {
 			case "English": return "1"; 
 			case "Russian": return "2";
+			case "German" : return "3";
 			default: throw String.format("Unsupported language: {0}", language);
 		}
 	});
@@ -124,23 +145,26 @@ var wordReferenceService = new Service(
 		["Italian", "English"], 
 		["Swedish", "English"], 
 		["Portugues", "English"], 
-		["Polish", "English"], 
 		["Romanian", "English"], 
 		["Czech", "English"], 
 		["Chinese", "English"], 
 		["Japanese", "English"], 
 		["Korean", "English"], 
-		["Arabic", "English"], 
 		["Turkish", "English"]
 	],
-	function (html) {
-		var node = $(html).find("#article");
-		if (node.contents().length == 0) {
-			node = $(html).find("#articleWRD table");
+	function (response) {
+		var doc = $(response.responseBody);
+		var node = doc.find("#article");
+		
+		console.log("!" + node.html().replace(/\s/mig, "") + "!");
+		if (doc.find("#article #FTintro").length > 0 
+			|| node.html().replace(/\s/mig, "") == "") {
+			node = doc.find("#articleWRD table:first");
 		}
 		
 		node.find("br:first, .small1").replaceWith("");
-		node.find("br:first").replaceWith("");		
+		node.find("br:first").replaceWith("");
+		node.find(".wrcopyright").replaceWith("");
 		return node;
 	}, 
 	function (language) {

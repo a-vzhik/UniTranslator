@@ -19,44 +19,50 @@ function createGuid() {
 function selectLanguage (languages, point, languageSelectedCallback) {
 	$("#languages").detach();
 	
-	var languagesHtml = languages
+	var languageDivs = languages
 		.map(function (l) {
-			return "<div><a href='#selectLanguage'>"+l+"</a></div>"
+			return $("<div>")
+				.append($("<a>")
+					.attr("href", "#selectLanguage")
+					.append(l));
 		})
-		.join("");
+		.aggregate($(), function (result, item) { 
+			return result.add(item); 
+		});
 		
-	var html = "<div id='languages'>"+languagesHtml+"</div>";
-	$("#options").append(html);
+	$("#options").append($("<div>")
+		.attr("id", "languages")
+		.css("left", point.x)
+		.css("top", point.y)
+		.append(languageDivs));
 		
-	$("#languages").css('left', point.x);
-	$("#languages").css('top', point.y);
-	
 	$("#languages a").click(function (e) {
 		languageSelectedCallback($(e.target).html());
 	});
 }
 
 function selectService (source, target, point, serviceSelectedCallback) {
-	var selector = "#services";
-	$(selector).detach();
+	$("#services").detach();
 	
-	var servicesHtml = availableServices
-		.where(function (item) {
-			return item.areLanguagesSupported(source, target); 
-		})
-		.map(function (s) {
-			return "<div><a href='#selectService'>"+s.name+"</a></div>";
-		})
-		.join("");
+	var serviceDivs = availableServices
+		.where(function (item) { return item.areLanguagesSupported(source, target); })
+		.map(function (s) {	
+			return $("<div>")
+				.append($("<a>")
+					.attr("href", "#selectService")
+					.append(s.name));
+		 })
+		.aggregate($(), function (result, item) { 
+			return result.add(item); 
+		});
 		
-	$("#options").append(
-		$("<div>")
-			.attr("id", "services")
-			.css('left', point.x)
-			.css('top', point.y)
-			.append(servicesHtml));
+	$("#options").append($("<div>")
+		.attr("id", "services")
+		.css('left', point.x)
+		.css('top', point.y)
+		.append(serviceDivs));
 		
-	$(selector + " a").click(function (e) {
+	$("#services a").click(function (e) {
 		serviceSelectedCallback($(e.target).html());
 	});
 }
@@ -64,9 +70,7 @@ function selectService (source, target, point, serviceSelectedCallback) {
 function fixService (preset) {
 	// If the current service supports both languages - there is no need to change a service
 	var activeService = availableServices
-		.where(function (s) {
-			return s.name == preset.service;
-		})
+		.where(function (s) { return s.name == preset.service; })
 		.firstOrNull();
 
 	if (activeService != null &&
@@ -83,22 +87,32 @@ function fixService (preset) {
 }
 
 function renderPreset (preset, target) {
-	console.log(preset.id);
-	
 	$("#presets").append(
-		$("<tr>").attr("class", "preset").attr("id", preset.id)
+		$("<tr>")
+			.attr("class", "preset")
+			.attr("id", preset.id)
+			.attr("valign", "middle")
 			.append($("<td>")
-				.append($("<a>").attr("href", "#changeSource")
+				.append($("<a>")
+					.attr("href", "#changeSource")
 					.append(preset.source)))
 			.append($("<td>")
-				.append($("<a>").attr("href", "#changeTarget")
+				.append($("<a>")
+					.attr("href", "#changeTarget")
 					.append(preset.target)))
 			.append($("<td>")
-				.append($("<a>").attr("href", "#changeService")
-					.append(preset.service != null ? preset.service : "No service")))
+				.append(preset.service == null 
+					? "No service"
+					: $("<a>")
+						.attr("href", "#changeService")
+						.append(preset.service)))
 			.append($("<td>")
-				.append($("<a>").attr("href", "#removePreset")
-					.append($("<img>").attr("src", "media/icons/close-32.png"))))
+				.append($("<a>")
+					.attr("href", "#removePreset")
+					.append($("<img>")
+						.attr("src", "media/icons/close-32.png")
+						.attr("width", "16")
+						.attr("height", "16"))))
 	)
 	
 	var presetSelector = String.format("#{0}", preset.id);
@@ -109,9 +123,7 @@ function renderPreset (preset, target) {
 		
 		var sourceLanguages = availableServices
 			.flatten(function (service) { return service.supportedLanguages; })
-			.map(function (pair) {
-				return pair[0]; 
-			})
+			.map(function (pair) { return pair[0]; })
 			.distinct()
 			.sort();		
 		
@@ -191,27 +203,17 @@ function invalidatePresets (presets) {
 	});
 }
 
-function removeNode (id) {
-	var node = document.getElementById(id);
-	if (node) {
-		var parent = node.parentNode || document.documentElement ;
-		parent.removeChild(node);
-	}	
-}
-
-
 $(document).ready(function () {
 	loadPreferences();
 		
 	$("#create-preset").click(function () {
 		var preset = {
-			source:languages[0], 
-			target:languages[0], 
-			service:availableServices[0].name, 
-			id:createGuid()
+			source: availableServices[0].supportedLanguages[0][0], 
+			target: availableServices[0].supportedLanguages[0][1], 
+			service: availableServices[0].name, 
+			id: createGuid()
 		};
 		
-		fixService(preset);
 		preferences.presets.push(preset);
 		savePreferences(preferences);
 	});

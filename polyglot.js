@@ -69,13 +69,15 @@ function onTranslateMenuItemClick (info, tab) {
 			chrome.storage.local.set(
 				items, 
 				function () { 
-					var codeToExecute = String.format('popupTranslation("{0} [{1} -> {2}]","{3}")', info.selectionText, preset.source, preset.target, key);
+					var codeToExecute = String.format(
+						'popupTranslation("{0} [{1} -> {2}]","{3}")', 
+						info.selectionText, 
+						preset.source, 
+						preset.target, 
+						key);
 					chrome.tabs.executeScript(tab.id, 
 						{
 							code: codeToExecute 
-						}, 
-						function () {
-							console.log("Code executed")
 						});
 				});
 		});

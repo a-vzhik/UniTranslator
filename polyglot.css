@@ -1,5 +1,5 @@
 ﻿#options{
-	font-size:16pt; font-family:Tahoma,Verdana,Arial	
+	font-size:10pt; font-family:Tahoma,Verdana,Arial	
 }
 
 .extension-translation {
@@ -7,21 +7,22 @@
 }
 
 #languages {
-	padding:0px 20px; background:white; border: solid 1px #CCC; position:absolute
+	background:white; border: solid 1px #CCC; position:absolute
 }
 
 #services {
-	padding:0px 20px; background:white; border: solid 1px #CCC; position:absolute
+	background:white; border: solid 1px #CCC; position:absolute
 }
 
 #services div, #languages div {
-	margin-top:10px;
-	margin-bottom:5px;
+	padding: 2px 20px 2px 20px;
+}
+#services div:hover, #languages div:hover{
+	background: #DDF;
 }
 
-
 #presets {
-	font-size:16pt;	
+	font-size:10pt;	
 	display: none;
 }
 
@@ -32,6 +33,10 @@
 
 #options a:hover {
 	text-decoration: underline;
+}
+
+#presets tr:hover {
+	background: #DDF;
 }
 
 #presets th {

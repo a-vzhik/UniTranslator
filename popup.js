@@ -75,9 +75,10 @@ function setupTranslationFrame (title, translation) {
 } 
 
 function popupTranslation (title, translationKey) {
+	$("#polyglot-extension-translation-frame").remove();
 	chrome.storage.local.get(
 		translationKey, 
-		function(items) {
+		function(items) {			
 			$(document.body).prepend(
 				$("<iframe>")
 					.attr("id", "polyglot-extension-translation-frame")
