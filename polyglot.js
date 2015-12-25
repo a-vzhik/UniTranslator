@@ -62,7 +62,7 @@ function onTranslateMenuItemClick (info, tab) {
 		info.selectionText, 
 		preset.source, 
 		preset.target, 
-		function (card) {	
+		function (card, uri) {	
 			var key = "translated";
 			var items = {};
 			items[key] = card;
@@ -70,11 +70,12 @@ function onTranslateMenuItemClick (info, tab) {
 				items, 
 				function () { 
 					var codeToExecute = String.format(
-						'popupTranslation("{0} [{1} -> {2}]","{3}")', 
+						'showTranslation("{0} [{1} -> {2}]", "{3}", "{4}")', 
 						info.selectionText, 
 						preset.source, 
 						preset.target, 
-						key);
+						key,
+						uri);
 					chrome.tabs.executeScript(tab.id, 
 						{
 							code: codeToExecute 

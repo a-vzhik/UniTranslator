@@ -59,7 +59,7 @@ Service.prototype.translate = function (word, source, target, callback) {
 		complementAttribute(card, "href", baseUrl);
 		complementAttribute(card, "src", baseUrl);
 
-		callback(card.html());
+		callback(card.html(), uri);
 	});
 };
 
@@ -112,9 +112,16 @@ var multitranService = new Service(
 	"Multitran", 
 	"http://multitran.ru/c/m.exe?l1={1}&l2={2}&s={0}",
 	[
-		["English", "Russian"], 
-		["German", "Russian"],
-		["Russian", "English"], ["Russian", "German"]
+		["English", "Russian"], ["English", "German"], ["English", "Estonian"],
+		["German", "Russian"], ["German", "English"],
+		["French", "Russian"],
+		["Spanish", "Russian"],
+		["Italian", "Russian"],
+		["Dutch", "Russian"],
+		["Estonian", "Russian"], ["Estonian", "English"],
+		["Latvian", "Russian"],
+		["Russian", "English"], ["Russian", "German"], ["Russian", "French"], ["Russian", "Spanish"], ["Russian", "Italian"], 
+		["Russian", "Estonian"], ["Russian", "Dutch"], ["Russian", "Latvian"]
 	], 
 	function (response) {
 		return $(response.responseBody).find("#translation~table:first");
@@ -124,6 +131,12 @@ var multitranService = new Service(
 			case "English": return "1"; 
 			case "Russian": return "2";
 			case "German" : return "3";
+			case "French" : return "4";
+			case "Spanish" : return "5";
+			case "Italian" : return "23";
+			case "Dutch" : return "24";
+			case "Estonian" : return "26";
+			case "Latvian" : return "27";
 			default: throw String.format("Unsupported language: {0}", language);
 		}
 	});
@@ -165,6 +178,11 @@ var wordReferenceService = new Service(
 		node.find("br:first, .small1").replaceWith("");
 		node.find("br:first").replaceWith("");
 		node.find(".wrcopyright").replaceWith("");
+		node.find(".FrWrd")
+			.css("width", "30%");
+		node.find("td").css("padding", "0px 5px");
+		node.find(".FrEx, .ToEx").css("color", "#A8A8A8");			
+			
 		return node;
 	}, 
 	function (language) {

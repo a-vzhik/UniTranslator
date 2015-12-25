@@ -6,7 +6,7 @@ function arrangeTranslationFrame () {
 	frame.css('top', $(document).scrollTop() + 10);
 }
 
-function setupTranslationFrame (title, translation) {
+function setupTranslationFrame (title, translation, uri) {
 	var frameContents = $("#polyglot-extension-translation-frame").contents();
 	
 	frameContents.find("body")
@@ -26,6 +26,14 @@ function setupTranslationFrame (title, translation) {
 					.append($("<img>")
 						.attr("style", "height:16px; width:16px;")
 						.attr("src", chrome.extension.getURL("close.svg"))))
+				.append($("<div>")
+					.attr("style", "cursor:pointer; float:right; margin:7px 10px;")
+					.append($("<a>")
+						.attr("href", uri)
+						.attr("target", "_blank")
+						.append($("<img>")
+							.attr("style", "height:16px; width:16px;")
+							.attr("src", chrome.extension.getURL("media/icons/external.svg")))))
 				.append($("<span>")
 					.attr("style", "margin-left:10px")
 					.append(title)))
@@ -74,7 +82,7 @@ function setupTranslationFrame (title, translation) {
 	$("#polyglot-extension-translation-frame").fadeIn('fast');
 } 
 
-function popupTranslation (title, translationKey) {
+function showTranslation (title, translationKey, uri) {
 	$("#polyglot-extension-translation-frame").remove();
 	chrome.storage.local.get(
 		translationKey, 
@@ -90,7 +98,7 @@ function popupTranslation (title, translationKey) {
 
 			var translation = items[translationKey];			
 			$("#polyglot-extension-translation-frame").ready(function () {
-				setupTranslationFrame(title, translation);
+				setupTranslationFrame(title, translation, uri);
 			});
 		});
 }
