@@ -25,7 +25,7 @@ function setupTranslationFrame (title, translation, uri) {
 					.attr("style", "cursor:pointer; float:right; margin:7px 10px;")
 					.append($("<img>")
 						.attr("style", "height:16px; width:16px;")
-						.attr("src", chrome.extension.getURL("close.svg"))))
+						.attr("src", chrome.extension.getURL("media/icons/close.svg"))))
 				.append($("<div>")
 					.attr("style", "cursor:pointer; float:right; margin:7px 10px;")
 					.append($("<a>")
