@@ -22,7 +22,7 @@ function setupTranslationFrame (title, translation, uri) {
 				.attr("style", "font-weight:bold; height:30px; background:#4EA6EA; color:white; line-height:30px;vertical-align:middle")
 				.append($("<div>")
 					.attr("id", "extension-translation-close-button")
-					.attr("style", "cursor:pointer; float:right; margin:7px 10px;")
+					.attr("style", "cursor:pointer; float:right; margin:7px 10px 7px 0px;")
 					.append($("<img>")
 						.attr("style", "height:16px; width:16px;")
 						.attr("src", chrome.extension.getURL("media/icons/close.svg"))))

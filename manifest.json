@@ -29,7 +29,7 @@
   }],
   "options_page": "options.html",
   "web_accessible_resources": [
-     "popup.html", "polyglot.css", "frame.html", "/media/icons/close.svg", "/media/icons/close-32.png", "/media/icons/external.svg" 
+     "popup.html", "polyglot.css", "/media/icons/close.svg", "/media/icons/close-32.png", "/media/icons/external.svg" 
   ]
 }
 

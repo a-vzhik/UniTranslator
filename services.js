@@ -124,7 +124,9 @@ var multitranService = new Service(
 		["Russian", "Estonian"], ["Russian", "Dutch"], ["Russian", "Latvian"]
 	], 
 	function (response) {
-		return $(response.responseBody).find("#translation~table:first");
+		var node = $(response.responseBody).find("#translation~table:first");
+		node.find("a").replaceWith(function (_, a) { return a; });
+		return node;
 	}, 
 	function (language) {
 		switch (language) {
