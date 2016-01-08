@@ -16,22 +16,53 @@
 		<link rel="stylesheet" href="polyglot.css"> 
 	</head>
 	<body id="options">
-		<center>
-			<br/>
-			<br/>
-			
-				<table id="presets" cellspacing="0">
-					<tr>
-						<th>Source language</th>
-						<th>Destination language</th>
-						<th>Translation service</th> 
-						<th></th>
-					</tr>
-				<table>
-					
-				<br/>
-	
-				<button id="create-preset" value="Create translation preset">Create preset</button>
-		</center>
+        <table id="options-container">
+            <tr style="height:1%;">
+                <td id="options-header">
+                    <center><span><span style="color:#5694FF">POLY</span><span style="color:#FF26B6">GLOT</span> EXTENSION OPTIONS</span>
+                    </center>
+                </td>
+            </tr>
+            
+            <tr style="height:1%">
+                <td align="center">
+                    <div style="height:0px; width:500px;  border-bottom: 1px dashed #ccc;"/>
+                </td>
+            </tr>
+            
+            <tr valign="top">
+                <td>
+                    <center>
+                        <br/>
+                        <div id="no-presets">
+                            <img src="media/icons/warning.svg" width="30" height="30" style="float:left;">
+                            Oops... To start using of Polyglot you need to create at least one preset.  Currently preset list is empty. Press "Create a preset" sooner to fix it.  
+                        </div>
+                        <table id="presets" cellspacing="0">
+                            <tr>
+                                <th>Source language</th>
+                                <th>Destination language</th>
+                                <th>Translation service</th> 
+                                <th></th>
+                            </tr>
+                        </table>
+                        <br/>
+                        <button id="create-preset" value="Create translation preset">Create a preset</button>
+                    </center>
+                </td>
+            </tr>
+            <tr style="height:1%">
+                <td id="options-footer">
+                    <div id="developer-info">
+                        <p>
+                            <b>Developed by: </b> Alexander Zhevzhik [<a href="mailto:alex.zhevzhik@gmail.com">alex.zhevzhik@gmail.com</a>]
+                        </p>
+                        <p>
+                            <b>Polyglot site:</b> <a target="_blank" href="https://github.com/a-vzhik/Polyglot">https://github.com/a-vzhik/Polyglot</a>
+                        </p>
+                    </div>
+                </td>
+            </tr>    
+        </div>
 	</body>
 </html>

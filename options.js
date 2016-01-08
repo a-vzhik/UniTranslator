@@ -201,6 +201,8 @@ function invalidatePresets (presets) {
 	presets.each(function (p) {
 		renderPreset(p, target);
 	});
+    
+    $("#no-presets").css("display", presets.length == 0 ? "block" : "none");
 }
 
 $(document).ready(function () {
