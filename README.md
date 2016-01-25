@@ -8,5 +8,6 @@ Polyglot supports several translation engines (and it's planned to add more):
 Polyglot supports translation from/to English, Russian, German, French, Italian, Spanish languages. 
 
 #Installation 
-1. [Polyglot](https://chrome.google.com/webstore/detail/unitranslator/mmeinjpglklclibddfmbckojmbjmogel) available at the Chrome Web Store. 
+There are two ways of installation: 
+1. Install [Polyglot](https://chrome.google.com/webstore/detail/unitranslator/mmeinjpglklclibddfmbckojmbjmogel) from the Chrome Web Store. 
 2. Clone the repository and install it in the Google Chrome browser manually from the "Extensions" tab.
