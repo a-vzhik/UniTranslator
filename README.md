@@ -9,5 +9,6 @@ Polyglot supports translation from/to English, Russian, German, French, Italian,
 
 #Installation 
 There are two ways of installation: 
+
 1. Install [Polyglot](https://chrome.google.com/webstore/detail/unitranslator/mmeinjpglklclibddfmbckojmbjmogel) from the Chrome Web Store. 
 2. Clone the repository and install it in the Google Chrome browser manually from the "Extensions" tab.
