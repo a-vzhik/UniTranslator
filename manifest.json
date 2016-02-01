@@ -1,10 +1,10 @@
 {
-  "name": "Polyglot",
-  "version": "1.1.0.1",
+  "name": "UniTranslator",
+  "version": "1.1.0.5",
   "manifest_version": 2,
   "description": "Translates a selected text from one language to another.",
   "background": {
-    "scripts": ["jquery.js", "functional.js", "array.extensions.js", "dictionary.js", "string.extensions.js", "preferences.js", "services.js", "polyglot.js"]
+    "scripts": ["jquery.js", "functional.js", "array.extensions.js", "dictionary.js", "string.extensions.js", "preferences.js", "services.js", "unitranslator.js"]
   },
   "permissions": [
     "storage",
@@ -24,7 +24,7 @@
   }],
   "options_page": "options.html",
   "web_accessible_resources": [
-     "popup.html", "polyglot.css", "/media/icons/close.svg", "/media/icons/close-32.png", "/media/icons/external.svg" 
+     "popup.html", "unitranslator.css", "/media/icons/close.svg", "/media/icons/close-32.png", "/media/icons/external.svg" 
   ]
 }
 

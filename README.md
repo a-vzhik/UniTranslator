@@ -1,5 +1,5 @@
 #Summary
-Polyglot is a Google Chrome extension that helps to get a transplation of any word while reading a webpage. 
+Polyglot is a Google Chrome extension that helps to get a translation of any word while reading a webpage. 
 Polyglot supports several translation engines (and it's planned to add more): 
 - [Abbyy Lingvo](http://www.lingvo-online.ru/ru/Translate/en-ru) 
 - [Multitran](http://www.multitran.ru/c/m.exe?a=1&SHL=2)
