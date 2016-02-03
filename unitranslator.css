@@ -9,11 +9,12 @@
 }
 
 #options-header{
+    background:#333; 
+    color:#ddd;
     text-align: center;
-    font-size: 20pt;
+    font-size: 30pt;
     padding: 10px;
     font-weight: bold;
-/*    background:#DDD;*/
 }
 
 #options-footer{

@@ -15,7 +15,7 @@ function createContextMenu (presets) {
 	
 	if (presets.length == 0) {
 		chrome.contextMenus.create({ 
-			"title": "Create translation presets...", 
+			"title": "UniTranslator: create a new preset...", 
 			"contexts": [context], 
 			"onclick": onOptionsMenuItemClick 
 		});
@@ -23,7 +23,7 @@ function createContextMenu (presets) {
 	}
 	else {
 		var menuItems = new Dictionary();
-		var parentTitle = "Translate with";
+		var parentTitle = "UniTranslator: translate with";
 		var parent = chrome.contextMenus.create({ 
 			"title": parentTitle,
 			"contexts": [context] 
@@ -41,7 +41,7 @@ function createContextMenu (presets) {
 		});
 		
 		chrome.contextMenus.create({ 
-			"title": "Create translation presets...", 
+			"title": "Create a new preset...", 
 			"contexts": [context], 
 			"parentId": parent, 
 			"onclick": onOptionsMenuItemClick 
