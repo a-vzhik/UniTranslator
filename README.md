@@ -17,6 +17,7 @@ There are two ways of installation:
 1. After installation of the extension, you can open a new webpage, select any word and right-click on it. A menu item should appear
 
   !["Create a new preset" menu](/media/screenshots/usage-1.png)
+
 2. Click on it and the "Options" webpage opens. There you need to press button "Create a preset".
 
 ![Brand new "Options" page](/media/screenshots/usage-2.png)
