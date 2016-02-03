@@ -20,11 +20,14 @@ There are two ways of installation:
 2. Click on it and the "Options" webpage opens. There you need to press button "Create a preset".
 
 ![Brand new "Options" page](/media/screenshots/usage-2.png)
+
 3. A new row appears in the table of translation presets. You may alter source language, target language and translation service for the specific language pair. Services are arranged automatically depending on what language pair has been selected. 
 
 ![Altering of a target language](/media/screenshots/usage-3.png)
 ![Altering of a service](/media/screenshots/usage-4.png)
+
 4. On the arbitrary webpage select a word and right-click on it. Go to "UnitTranslator: translate with" menu and select a preset you want to use for translation. Wait a second while UniTranslator processes the request and enjoy.
 
 ![Translate a word](/media/screenshots/usage-5.png)
+
 5. Create as many presets as you wish. 
