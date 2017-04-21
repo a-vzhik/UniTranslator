@@ -2,7 +2,14 @@ var storageKeys = {
 	preferences: "prefs",
 }
 
+
+chrome.runtime.onMessage.addListener(
+	function (request, sender, sendResponse) {
+		console.log(request);
+	});
+
 function loadPreferences (callback) {
+	console.log("loadPreferences");
 	chrome.storage.local.get(
 		storageKeys.preferences, 
 		function (items) {
@@ -10,16 +17,17 @@ function loadPreferences (callback) {
 			if (storageKeys.preferences in items) {
 				preferences = items[storageKeys.preferences];
 			}
-			else { 
+			
+			if (preferences == null) {  
 				preferences = {
 					presets: []
 				};
 			}
 			
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 				preferences: preferences
 			});
-			
+
 			if (callback) {
 				callback(preferences);
 			}
@@ -32,7 +40,7 @@ function savePreferences (prefs, callback) {
 	chrome.storage.local.set(
 		key, 
 		function () { 
-			chrome.extension.sendMessage({
+			chrome.runtime.sendMessage({
 				preferences: prefs
 			});
 			if (callback) {

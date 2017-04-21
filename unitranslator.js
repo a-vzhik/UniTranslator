@@ -1,28 +1,19 @@
-var wordReferenceApiKey = "00ecd";
-var menuItemsData = null;
+var CREATE_NEW_PRESET_ID = "Create_New_Preset_Id";
+var CREATE_NEW_PRESET_TITLE = "Create a new preset...";
 
-chrome.extension.onMessage.addListener(
-	function (request, sender, sendResponse) {
-		if (request.preferences) {
-			chrome.contextMenus.removeAll(function () { 
-				menuItemsData = createContextMenu(request.preferences.presets);
-			});
-		}
-	});
 
 function createContextMenu (presets) {
 	var context = "selection";
 	
 	if (presets.length == 0) {
 		chrome.contextMenus.create({ 
-			"title": "UniTranslator: create a new preset...", 
+			"id": CREATE_NEW_PRESET_ID,
+			"title": CREATE_NEW_PRESET_TITLE, 
 			"contexts": [context], 
-			"onclick": onOptionsMenuItemClick 
 		});
 		return null;
 	}
 	else {
-		var menuItems = new Dictionary();
 		var parentTitle = "UniTranslator: translate with";
 		var parent = chrome.contextMenus.create({ 
 			"title": parentTitle,
@@ -31,63 +22,90 @@ function createContextMenu (presets) {
 
 		presets.each(function (preset) {
 			var id = chrome.contextMenus.create({ 
+				"id": preset.id,
 				"title": String.format("{0} [{1} > {2}]", preset.service, preset.source, preset.target),
 				"contexts": [context],
-				"parentId": parent,
-				"onclick": onTranslateMenuItemClick
+				"parentId": parent
 			});
-			
-			menuItems.store(id, preset);
 		});
 		
 		chrome.contextMenus.create({ 
-			"title": "Create a new preset...", 
+			"id": CREATE_NEW_PRESET_ID,
+			"title": CREATE_NEW_PRESET_TITLE, 
 			"contexts": [context], 
 			"parentId": parent, 
-			"onclick": onOptionsMenuItemClick 
 		});
-		
-		return menuItems;
 	}
 }
 
 function onTranslateMenuItemClick (info, tab) {
-	var preset = menuItemsData.lookup(info.menuItemId);
-	var service = availableServices
-		.where(function (s) {
-			return preset.service == s.name;
-		})[0]; 
+	loadPreferences(function (prefs) {
+		var presetId = info.menuItemId;
 
-	service.translate(
-		info.selectionText, 
-		preset.source, 
-		preset.target, 
-		function (card, uri) {	
-			var key = "translated";
-			var items = {};
-			items[key] = card;
-			chrome.storage.local.set(
-				items, 
-				function () { 
-					var codeToExecute = String.format(
-						'showTranslation("{0} [{1} -> {2}]", "{3}", "{4}")', 
-						info.selectionText, 
-						preset.source, 
-						preset.target, 
-						key,
-						uri);
-					chrome.tabs.executeScript(tab.id, 
-						{
-							code: codeToExecute 
-						});
-				});
-		});
+		var preset = prefs.presets
+			.where(function (p) { return p.id == presetId; })
+			.firstOrNull();
+
+		var service = availableServices
+			.where(function (s) {
+				return preset.service == s.name;
+			})[0]; 
+
+		service.translate(
+			info.selectionText, 
+			preset.source, 
+			preset.target, 
+			function (card, uri) {	
+				var key = "translated";
+				var items = {};
+				items[key] = card;
+				chrome.storage.local.set(
+					items, 
+					function () { 
+						var codeToExecute = String.format(
+							'showTranslation("{0} [{1} -> {2}]", "{3}", "{4}")', 
+							info.selectionText, 
+							preset.source, 
+							preset.target, 
+							key,
+							uri);
+						chrome.tabs.executeScript(tab.id, 
+							{
+								code: codeToExecute 
+							});
+					});
+			});
+	});
 }
 
-function onOptionsMenuItemClick (info, tab) {
+function onOptionsMenuItemClick () {
 	chrome.tabs.create({
 		url: chrome.extension.getURL("options.html")
 	})
 }
 
-loadPreferences();
+function refreshContextMenu (preferences) {
+	chrome.contextMenus.removeAll(function () { 
+		if (preferences) {
+			createContextMenu(preferences.presets);
+		}
+	});
+}
+
+chrome.runtime.onMessage.addListener(
+	function (request, sender, sendResponse) {
+		refreshContextMenu(request.preferences);
+	});
+
+chrome.contextMenus.onClicked.addListener(function(info, tab){
+	if (info.menuItemId == CREATE_NEW_PRESET_ID) {
+		onOptionsMenuItemClick(info, tab);
+	}
+	else {
+		onTranslateMenuItemClick(info, tab);
+	}
+});
+
+loadPreferences(function (prefs) {
+	refreshContextMenu(prefs);
+});

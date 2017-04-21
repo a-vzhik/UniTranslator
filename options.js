@@ -1,14 +1,3 @@
-var preferences = null;
-
-chrome.extension.onMessage.addListener(
-	function(request, sender, sendResponse) {
-		//console.log(JSON.stringify(request));
-		if (request.contains("preferences")) {
-			preferences = request.preferences;
-			invalidatePresets(preferences.presets);
-		}
-	});
-
 function createGuid() {
     function S4() {
        return (((1+Math.random())*0x10000) | 0).toString(16).substring(1);
@@ -136,7 +125,7 @@ function renderPreset (preset, target) {
 			function (language) {
 				preset.source = language;
 				fixService(preset);
-				savePreferences(preferences);
+				replacePreset(preset);
 			});
 	});
 	
@@ -159,7 +148,7 @@ function renderPreset (preset, target) {
 			function (language) {
 				preset.target = language;
 				fixService(preset);
-				savePreferences(preferences);
+				replacePreset(preset);
 			});
 	});
 	
@@ -175,15 +164,26 @@ function renderPreset (preset, target) {
 			}, 
 			function (service) {
 				preset.service = service;
-				savePreferences(preferences);
+				replacePreset(preset);
 			});
 	});	
 	
 	var removeSelector = String.format("{0} a[href='#removePreset']", presetSelector);
 	$(removeSelector).click(function () {
-		preferences.presets.remove(preset);
-		savePreferences(preferences);
+		updatePresets(function (prefs) {
+			prefs.presets.remove(preset);
+		});
 	});
+}
+
+function replacePreset(preset) {
+	updatePresets(function (prefs) {
+		for (var i = 0; i < prefs.presets.length; i++) {
+			if (prefs.presets[i].id == preset.id) {
+				prefs.presets[i] = preset;
+			}
+		}
+	});				
 }
 
 function destroyChildren (node) {
@@ -205,23 +205,40 @@ function invalidatePresets (presets) {
     $("#no-presets").css("display", presets.length == 0 ? "block" : "none");
 }
 
+function refreshPresets() {
+	loadPreferences(function (prefs) {
+		console.log(prefs);
+		invalidatePresets(prefs.presets);
+	});	
+}
+
+function updatePresets(callback) {
+	loadPreferences(function (prefs) {
+		callback(prefs);
+		savePreferences(prefs, function () {
+			invalidatePresets(prefs.presets);
+		});
+	});
+}
+
 $(document).ready(function () {
-	loadPreferences();
-		
 	$("#create-preset").click(function () {
-		var preset = {
-			source: availableServices[0].supportedLanguages[0][0], 
-			target: availableServices[0].supportedLanguages[0][1], 
-			service: availableServices[0].name, 
-			id: createGuid()
-		};
-		
-		preferences.presets.push(preset);
-		savePreferences(preferences);
+		updatePresets(function(prefs) {
+			var preset = {
+				source: availableServices[0].supportedLanguages[0][0], 
+				target: availableServices[0].supportedLanguages[0][1], 
+				service: availableServices[0].name, 
+				id: createGuid()
+			};
+			
+			prefs.presets.push(preset);
+		});
 	});
 
 	$(document).click(function () {
 		$("#languages").detach();
 		$("#services").detach();
 	});
+
+	refreshPresets();
 });
